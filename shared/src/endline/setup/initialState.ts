@@ -1,7 +1,7 @@
 import { BOARD_SIZE, DEFAULT_WIN_TARGET } from "../constants/game";
-import type { GameState, Piece, PlayerId } from "../types/game";
+import type { GameState, Piece, PlayerId, SquareColor } from "../types/game";
 
-function getSquareColor(row: number, col: number): "light" | "dark" {
+function getSquareColor(row: number, col: number): SquareColor {
   return (row + col) % 2 === 0 ? "light" : "dark";
 }
 
@@ -37,5 +37,6 @@ export function createInitialGameState(): GameState {
     winner: null,
     winTarget: DEFAULT_WIN_TARGET,
     showMoveHints: true,
+    selectedPieceId: null,
   };
 }

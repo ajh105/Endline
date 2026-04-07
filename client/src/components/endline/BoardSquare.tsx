@@ -5,15 +5,33 @@ type BoardSquareProps = {
   row: number;
   col: number;
   piece?: GamePiece;
+  isSelected: boolean;
+  isLegalDestination: boolean;
+  onClick: () => void;
 };
 
-function BoardSquare({ row, col, piece }: BoardSquareProps) {
+function BoardSquare({
+  row,
+  col,
+  piece,
+  isSelected,
+  isLegalDestination,
+  onClick,
+}: BoardSquareProps) {
   const squareColor = (row + col) % 2 === 0 ? "light" : "dark";
 
   return (
-    <div className={`endline-square ${squareColor}`}>
-      {piece ? <Piece owner={piece.owner} locked={piece.locked} /> : null}
-    </div>
+    <button
+      type="button"
+      className={`endline-square ${squareColor} ${
+        isLegalDestination ? "legal-destination" : ""
+      }`}
+      onClick={onClick}
+    >
+      {piece ? (
+        <Piece owner={piece.owner} locked={piece.locked} isSelected={isSelected} />
+      ) : null}
+    </button>
   );
 }
 

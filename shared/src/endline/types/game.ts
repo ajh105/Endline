@@ -1,5 +1,7 @@
 export type PlayerId = "red" | "blue";
 
+export type SquareColor = "light" | "dark";
+
 export type Position = {
   row: number;
   col: number;
@@ -12,10 +14,16 @@ export type Piece = {
   locked: boolean;
   hasLeftBaseline: boolean;
   alive: boolean;
-  squareColor: "light" | "dark";
+  squareColor: SquareColor;
 };
 
 export type GameStatus = "playing" | "red_won" | "blue_won";
+
+export type LegalMove = {
+  pieceId: string;
+  path: Position[];
+  destination: Position;
+};
 
 export type GameState = {
   pieces: Piece[];
@@ -25,4 +33,5 @@ export type GameState = {
   winner: PlayerId | null;
   winTarget: number;
   showMoveHints: boolean;
+  selectedPieceId: string | null;
 };

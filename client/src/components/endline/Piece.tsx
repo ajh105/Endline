@@ -1,11 +1,16 @@
 type PieceProps = {
   owner: "red" | "blue";
   locked: boolean;
+  isSelected: boolean;
 };
 
-function Piece({ owner, locked }: PieceProps) {
+function Piece({ owner, locked, isSelected }: PieceProps) {
   return (
-    <div className={`endline-piece ${owner} ${locked ? "locked" : ""}`}>
+    <div
+      className={`endline-piece ${owner} ${locked ? "locked" : ""} ${
+        isSelected ? "selected" : ""
+      }`}
+    >
       {locked ? "✓" : ""}
     </div>
   );
