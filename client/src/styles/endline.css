@@ -1,0 +1,82 @@
+.endline-page {
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.endline-header {
+  margin-bottom: 24px;
+}
+
+.endline-header h1 {
+  margin: 0 0 8px;
+}
+
+.endline-header p {
+  margin: 0;
+  color: #cfcfcf;
+}
+
+.endline-layout {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.endline-board {
+  display: grid;
+  grid-template-columns: repeat(8, 72px);
+  grid-template-rows: repeat(8, 72px);
+  border: 2px solid #444;
+}
+
+.endline-square {
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.endline-square.light {
+  background: #d8c3a5;
+}
+
+.endline-square.dark {
+  background: #8d6e63;
+}
+
+.endline-piece {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  border: 2px solid rgba(255, 255, 255, 0.65);
+}
+
+.endline-piece.red {
+  background: #c62828;
+}
+
+.endline-piece.blue {
+  background: #1565c0;
+}
+
+.endline-piece.locked {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35) inset;
+}
+
+.endline-panel {
+  min-width: 220px;
+  padding: 16px;
+  border: 1px solid #444;
+  border-radius: 8px;
+  background: #1b1b1b;
+}
+
+.endline-panel h2 {
+  margin-top: 0;
+}

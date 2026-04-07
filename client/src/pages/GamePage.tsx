@@ -1,5 +1,8 @@
+import EndlineGame from "../components/endline/EndlineGame";
+import "../styles/endline.css";
+
 function GamePage() {
-  return <div>Game Page</div>;
+  return <EndlineGame />;
 }
 
 export default GamePage;
