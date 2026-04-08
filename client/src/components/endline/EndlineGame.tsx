@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import {
   applyLegalMove,
   createInitialGameState,
-  getLegalNonCapturingMoves,
+  getLegalMoves,
 } from "@shared";
 import type { GameState, LegalMove } from "@shared";
 import Board from "./Board";
@@ -21,7 +21,7 @@ function EndlineGame() {
       return [];
     }
 
-    return getLegalNonCapturingMoves(
+    return getLegalMoves(
       selectedPiece,
       gameState.pieces,
       gameState.currentRoll
@@ -87,7 +87,7 @@ function EndlineGame() {
     <main className="endline-page">
       <section className="endline-header">
         <h1>Endline</h1>
-        <p>Basic movement checkpoint</p>
+        <p>Capture checkpoint</p>
       </section>
 
       <section className="endline-layout">

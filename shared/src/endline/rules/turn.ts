@@ -17,7 +17,9 @@ export function applyLegalMove(
   gameState: GameState,
   move: LegalMove
 ): GameState {
-  const piece = gameState.pieces.find((currentPiece) => currentPiece.id === move.pieceId);
+  const piece = gameState.pieces.find(
+    (currentPiece) => currentPiece.id === move.pieceId
+  );
 
   if (!piece) {
     return gameState;
@@ -28,11 +30,21 @@ export function applyLegalMove(
   const reachedOpponentBaseline = destination.row === opponentBaselineRow;
 
   const updatedPieces = gameState.pieces.map((currentPiece) => {
+    if (currentPiece.id === move.capturedPieceId) {
+      return {
+        ...currentPiece,
+        alive: false,
+      };
+    }
+
     if (currentPiece.id !== move.pieceId) {
       return currentPiece;
     }
 
-    const startedOnOwnBaseline = isOwnBaseline(currentPiece.position, currentPiece.owner);
+    const startedOnOwnBaseline = isOwnBaseline(
+      currentPiece.position,
+      currentPiece.owner
+    );
     const leftOwnBaselineThisMove =
       startedOnOwnBaseline && !isOwnBaseline(destination, currentPiece.owner);
 
@@ -53,6 +65,14 @@ export function applyLegalMove(
     (currentPiece) => currentPiece.owner === "blue" && currentPiece.locked
   ).length;
 
+  const redAliveCount = updatedPieces.filter(
+    (currentPiece) => currentPiece.owner === "red" && currentPiece.alive
+  ).length;
+
+  const blueAliveCount = updatedPieces.filter(
+    (currentPiece) => currentPiece.owner === "blue" && currentPiece.alive
+  ).length;
+
   if (redLockedCount >= gameState.winTarget) {
     return {
       ...gameState,
@@ -69,6 +89,26 @@ export function applyLegalMove(
       pieces: updatedPieces,
       status: "blue_won",
       winner: "blue",
+      selectedPieceId: null,
+    };
+  }
+
+  if (redAliveCount < gameState.winTarget) {
+    return {
+      ...gameState,
+      pieces: updatedPieces,
+      status: "blue_won",
+      winner: "blue",
+      selectedPieceId: null,
+    };
+  }
+
+  if (blueAliveCount < gameState.winTarget) {
+    return {
+      ...gameState,
+      pieces: updatedPieces,
+      status: "red_won",
+      winner: "red",
       selectedPieceId: null,
     };
   }

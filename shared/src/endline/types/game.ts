@@ -23,6 +23,7 @@ export type LegalMove = {
   pieceId: string;
   path: Position[];
   destination: Position;
+  capturedPieceId: string | null;
 };
 
 export type GameState = {
