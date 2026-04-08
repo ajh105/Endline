@@ -1,19 +1,19 @@
 import type { LegalMove, Piece, Position } from "../types/game";
 import {
   getPieceAtPosition,
+  getDiagonalNeighbors,
   isOwnBaseline,
   isPositionOccupied,
   positionKey,
   positionsEqual,
 } from "../utils/board";
 
-type SearchState = {
+type NormalSearchState = {
   current: Position;
   stepsRemaining: number;
   path: Position[];
   visited: Set<string>;
   hasLeftOwnBaselineInThisPath: boolean;
-  capturedPieceId: string | null;
 };
 
 function getDiagonalDirections(): Array<{ rowDelta: number; colDelta: number }> {
@@ -25,7 +25,7 @@ function getDiagonalDirections(): Array<{ rowDelta: number; colDelta: number }> 
   ];
 }
 
-function getAdjacentPosition(
+function getOffsetPosition(
   position: Position,
   rowDelta: number,
   colDelta: number
@@ -45,6 +45,74 @@ function isWithinBoard(position: Position): boolean {
   );
 }
 
+function searchNormalMoves(
+  piece: Piece,
+  pieces: Piece[],
+  start: Position,
+  state: NormalSearchState,
+  results: LegalMove[],
+  capturedPieceId: string | null
+) {
+  if (state.stepsRemaining === 0) {
+    if (!positionsEqual(state.current, start)) {
+      results.push({
+        pieceId: piece.id,
+        path: state.path,
+        destination: state.current,
+        capturedPieceId,
+      });
+    }
+    return;
+  }
+
+  const neighbors = getDiagonalNeighbors(state.current);
+
+  for (const next of neighbors) {
+    const nextKey = positionKey(next);
+    const nextIsOwnBaseline = isOwnBaseline(next, piece.owner);
+    const currentIsOwnBaseline = isOwnBaseline(state.current, piece.owner);
+
+    if (isPositionOccupied(pieces, next)) {
+      continue;
+    }
+
+    if (nextKey === positionKey(start)) {
+      continue;
+    }
+
+    if (state.visited.has(nextKey)) {
+      continue;
+    }
+
+    if (piece.hasLeftBaseline && nextIsOwnBaseline) {
+      continue;
+    }
+
+    if (state.hasLeftOwnBaselineInThisPath && nextIsOwnBaseline) {
+      continue;
+    }
+
+    const nextHasLeftOwnBaselineInThisPath =
+      state.hasLeftOwnBaselineInThisPath ||
+      (currentIsOwnBaseline && !nextIsOwnBaseline);
+
+    searchNormalMoves(
+      piece,
+      pieces,
+      start,
+      {
+        current: next,
+        stepsRemaining: state.stepsRemaining - 1,
+        path: [...state.path, next],
+        visited: new Set(state.visited).add(nextKey),
+        hasLeftOwnBaselineInThisPath: nextHasLeftOwnBaselineInThisPath,
+      },
+      results,
+      capturedPieceId
+    );
+  }
+}
+
 export function getLegalMoves(
   piece: Piece,
   pieces: Piece[],
@@ -58,139 +126,97 @@ export function getLegalMoves(
   const start = piece.position;
   const startKey = positionKey(start);
 
-  function search(state: SearchState) {
-    if (state.stepsRemaining === 0) {
-      if (!positionsEqual(state.current, start)) {
-        results.push({
-          pieceId: piece.id,
-          path: state.path,
-          destination: state.current,
-          capturedPieceId: state.capturedPieceId,
-        });
-      }
-      return;
+  // Branch 1: pure non-capturing moves
+  searchNormalMoves(
+    piece,
+    pieces,
+    start,
+    {
+      current: start,
+      stepsRemaining: roll,
+      path: [start],
+      visited: new Set([startKey]),
+      hasLeftOwnBaselineInThisPath: false,
+    },
+    results,
+    null
+  );
+
+  // Branch 2: capture must happen on the first movement step only
+  for (const direction of getDiagonalDirections()) {
+    const adjacent = getOffsetPosition(
+      start,
+      direction.rowDelta,
+      direction.colDelta
+    );
+
+    if (!isWithinBoard(adjacent)) {
+      continue;
     }
 
-    for (const direction of getDiagonalDirections()) {
-      const adjacent = getAdjacentPosition(
-        state.current,
-        direction.rowDelta,
-        direction.colDelta
-      );
+    const adjacentPiece = getPieceAtPosition(pieces, adjacent);
 
-      if (!isWithinBoard(adjacent)) {
-        continue;
-      }
+    if (!adjacentPiece) {
+      continue;
+    }
 
-      const adjacentKey = positionKey(adjacent);
-      const adjacentPiece = getPieceAtPosition(pieces, adjacent);
-      const adjacentIsOwnBaseline = isOwnBaseline(adjacent, piece.owner);
-      const currentIsOwnBaseline = isOwnBaseline(state.current, piece.owner);
+    if (adjacentPiece.owner === piece.owner) {
+      continue;
+    }
 
-      // Normal non-capturing step
-      if (!adjacentPiece) {
-        if (adjacentKey === startKey) {
-          continue;
-        }
+    const landing = getOffsetPosition(
+      adjacent,
+      direction.rowDelta,
+      direction.colDelta
+    );
 
-        if (state.visited.has(adjacentKey)) {
-          continue;
-        }
+    if (!isWithinBoard(landing)) {
+      continue;
+    }
 
-        if (piece.hasLeftBaseline && adjacentIsOwnBaseline) {
-          continue;
-        }
+    const landingKey = positionKey(landing);
+    const landingIsOwnBaseline = isOwnBaseline(landing, piece.owner);
+    const startIsOwnBaseline = isOwnBaseline(start, piece.owner);
 
-        if (state.hasLeftOwnBaselineInThisPath && adjacentIsOwnBaseline) {
-          continue;
-        }
+    if (landingKey === startKey) {
+      continue;
+    }
 
-        const nextHasLeftOwnBaselineInThisPath =
-          state.hasLeftOwnBaselineInThisPath ||
-          (currentIsOwnBaseline && !adjacentIsOwnBaseline);
+    if (isPositionOccupied(pieces, landing)) {
+      continue;
+    }
 
-        search({
-          current: adjacent,
-          stepsRemaining: state.stepsRemaining - 1,
-          path: [...state.path, adjacent],
-          visited: new Set(state.visited).add(adjacentKey),
-          hasLeftOwnBaselineInThisPath: nextHasLeftOwnBaselineInThisPath,
-          capturedPieceId: state.capturedPieceId,
-        });
+    if (piece.hasLeftBaseline && landingIsOwnBaseline) {
+      continue;
+    }
 
-        continue;
-      }
+    const hasLeftOwnBaselineInThisPath =
+      startIsOwnBaseline && !landingIsOwnBaseline;
 
-      // Capture step
-      if (state.capturedPieceId !== null) {
-        continue;
-      }
-
-      if (adjacentPiece.owner === piece.owner) {
-        continue;
-      }
-
-      const landing = getAdjacentPosition(
-        adjacent,
-        direction.rowDelta,
-        direction.colDelta
-      );
-
-      if (!isWithinBoard(landing)) {
-        continue;
-      }
-
-      const landingKey = positionKey(landing);
-      const landingIsOwnBaseline = isOwnBaseline(landing, piece.owner);
-
-      if (landingKey === startKey) {
-        continue;
-      }
-
-      if (state.visited.has(landingKey)) {
-        continue;
-      }
-
-      if (isPositionOccupied(pieces, landing)) {
-        continue;
-      }
-
-      if (piece.hasLeftBaseline && landingIsOwnBaseline) {
-        continue;
-      }
-
-      if (state.hasLeftOwnBaselineInThisPath && landingIsOwnBaseline) {
-        continue;
-      }
-
-      const nextHasLeftOwnBaselineInThisPath =
-        state.hasLeftOwnBaselineInThisPath ||
-        (currentIsOwnBaseline && !landingIsOwnBaseline);
-
-      search({
+    searchNormalMoves(
+      piece,
+      pieces,
+      start,
+      {
         current: landing,
-        stepsRemaining: state.stepsRemaining - 1,
-        path: [...state.path, landing],
-        visited: new Set(state.visited).add(landingKey),
-        hasLeftOwnBaselineInThisPath: nextHasLeftOwnBaselineInThisPath,
-        capturedPieceId: adjacentPiece.id,
-      });
-    }
+        stepsRemaining: roll - 1,
+        path: [start, landing],
+        visited: new Set([startKey, landingKey]),
+        hasLeftOwnBaselineInThisPath,
+      },
+      results,
+      adjacentPiece.id
+    );
   }
-
-  search({
-    current: start,
-    stepsRemaining: roll,
-    path: [start],
-    visited: new Set([startKey]),
-    hasLeftOwnBaselineInThisPath: false,
-    capturedPieceId: null,
-  });
 
   const deduped = new Map<string, LegalMove>();
 
   for (const move of results) {
-    const key = `${positionKey(move.destination)}|${move.capturedPieceId ?? "none"}`;
+    const pathKey = move.path.map((position) => positionKey(position)).join("|");
+    const key = `${move.destination.row},${move.destination.col}|${
+      move.capturedPieceId ?? "none"
+    }|${pathKey}`;
+
     if (!deduped.has(key)) {
       deduped.set(key, move);
     }

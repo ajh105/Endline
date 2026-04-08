@@ -80,6 +80,7 @@ export function applyLegalMove(
       status: "red_won",
       winner: "red",
       selectedPieceId: null,
+      previewMove: null,
     };
   }
 
@@ -90,6 +91,7 @@ export function applyLegalMove(
       status: "blue_won",
       winner: "blue",
       selectedPieceId: null,
+      previewMove: null,
     };
   }
 
@@ -100,6 +102,7 @@ export function applyLegalMove(
       status: "blue_won",
       winner: "blue",
       selectedPieceId: null,
+      previewMove: null,
     };
   }
 
@@ -110,6 +113,7 @@ export function applyLegalMove(
       status: "red_won",
       winner: "red",
       selectedPieceId: null,
+      previewMove: null,
     };
   }
 
@@ -119,6 +123,7 @@ export function applyLegalMove(
     currentPlayer: getOpponent(gameState.currentPlayer),
     currentRoll: rollD4(),
     selectedPieceId: null,
+    previewMove: null,
     status: "playing",
     winner: null,
   };

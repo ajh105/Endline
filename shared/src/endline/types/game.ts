@@ -35,4 +35,5 @@ export type GameState = {
   winTarget: number;
   showMoveHints: boolean;
   selectedPieceId: string | null;
+  previewMove: LegalMove | null;
 };

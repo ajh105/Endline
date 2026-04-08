@@ -3,6 +3,7 @@ import {
   applyLegalMove,
   createInitialGameState,
   getLegalMoves,
+  positionKey,
 } from "@shared";
 import type { GameState, LegalMove } from "@shared";
 import Board from "./Board";
@@ -28,13 +29,21 @@ function EndlineGame() {
     );
   }, [selectedPiece, gameState.pieces, gameState.currentRoll, gameState.status]);
 
-  const getLegalMoveForDestination = (
-    row: number,
-    col: number
-  ): LegalMove | undefined => {
-    return legalMoves.find(
-      (move) => move.destination.row === row && move.destination.col === col
-    );
+  const groupedMoves = useMemo(() => {
+    const grouped = new Map<string, LegalMove[]>();
+
+    for (const move of legalMoves) {
+      const key = positionKey(move.destination);
+      const existing = grouped.get(key) ?? [];
+      existing.push(move);
+      grouped.set(key, existing);
+    }
+
+    return grouped;
+  }, [legalMoves]);
+
+  const getMovesForDestination = (row: number, col: number): LegalMove[] => {
+    return groupedMoves.get(`${row},${col}`) ?? [];
   };
 
   const handleSquareClick = (row: number, col: number) => {
@@ -42,10 +51,44 @@ function EndlineGame() {
       return;
     }
 
-    const clickedLegalMove = getLegalMoveForDestination(row, col);
+    const destinationMoves = getMovesForDestination(row, col);
 
-    if (clickedLegalMove) {
-      setGameState((current) => applyLegalMove(current, clickedLegalMove));
+    if (destinationMoves.length > 0) {
+      setGameState((current) => {
+        const currentPreview = current.previewMove;
+
+        if (
+          currentPreview &&
+          currentPreview.destination.row === row &&
+          currentPreview.destination.col === col
+        ) {
+          const currentIndex = destinationMoves.findIndex(
+            (move) =>
+              move.pieceId === currentPreview.pieceId &&
+              move.capturedPieceId === currentPreview.capturedPieceId &&
+              move.path.length === currentPreview.path.length &&
+              move.path.every(
+                (position, index) =>
+                  position.row === currentPreview.path[index]?.row &&
+                  position.col === currentPreview.path[index]?.col
+              )
+          );
+
+          const nextIndex =
+            currentIndex >= 0 ? (currentIndex + 1) % destinationMoves.length : 0;
+
+          return {
+            ...current,
+            previewMove: destinationMoves[nextIndex],
+          };
+        }
+
+        return {
+          ...current,
+          previewMove: destinationMoves[0],
+        };
+      });
+
       return;
     }
 
@@ -60,6 +103,7 @@ function EndlineGame() {
       setGameState((current) => ({
         ...current,
         selectedPieceId: null,
+        previewMove: null,
       }));
       return;
     }
@@ -76,6 +120,7 @@ function EndlineGame() {
       ...current,
       selectedPieceId:
         current.selectedPieceId === clickedPiece.id ? null : clickedPiece.id,
+      previewMove: null,
     }));
   };
 
@@ -83,11 +128,39 @@ function EndlineGame() {
     setGameState(createInitialGameState());
   };
 
+  const handleToggleHints = () => {
+    setGameState((current) => ({
+      ...current,
+      showMoveHints: !current.showMoveHints,
+      previewMove: !current.showMoveHints ? current.previewMove : current.previewMove,
+    }));
+  };
+
+  const handleConfirmMove = () => {
+    if (!gameState.previewMove) {
+      return;
+    }
+
+    setGameState((current) => applyLegalMove(current, current.previewMove!));
+  };
+
+  const previewMove = gameState.previewMove;
+  const previewPath = previewMove?.path ?? [];
+  const previewDestination = previewMove?.destination ?? null;
+  const capturedPiece =
+    previewMove?.capturedPieceId
+      ? gameState.pieces.find((piece) => piece.id === previewMove.capturedPieceId) ?? null
+      : null;
+
+  const pathVariantCount = previewDestination
+    ? getMovesForDestination(previewDestination.row, previewDestination.col).length
+    : 0;
+
   return (
     <main className="endline-page">
       <section className="endline-header">
         <h1>Endline</h1>
-        <p>Capture checkpoint</p>
+        <p>Clear path preview checkpoint</p>
       </section>
 
       <section className="endline-layout">
@@ -96,6 +169,9 @@ function EndlineGame() {
           selectedPieceId={gameState.selectedPieceId}
           legalMoves={legalMoves}
           showMoveHints={gameState.showMoveHints}
+          previewPath={previewPath}
+          previewDestination={previewDestination}
+          previewCapturedPieceId={previewMove?.capturedPieceId ?? null}
           onSquareClick={handleSquareClick}
         />
 
@@ -125,11 +201,52 @@ function EndlineGame() {
             <strong>Legal Destinations:</strong> {legalMoves.length}
           </p>
 
+          <div className="endline-preview-box">
+            <h3>Preview</h3>
+            <p>
+              <strong>Capture:</strong> {previewMove?.capturedPieceId ? "Yes" : "No"}
+            </p>
+            <p>
+              <strong>Path Length:</strong>{" "}
+              {previewMove ? previewMove.path.length - 1 : 0}
+            </p>
+            <p>
+              <strong>Destination:</strong>{" "}
+              {previewDestination
+                ? `(${previewDestination.row}, ${previewDestination.col})`
+                : "None"}
+            </p>
+            <p>
+              <strong>Captured Piece:</strong>{" "}
+              {capturedPiece ? capturedPiece.id : "None"}
+            </p>
+            <p>
+              <strong>Path Option Count:</strong> {pathVariantCount}
+            </p>
+          </div>
+
           <div className="endline-panel-actions">
+            <button type="button" onClick={handleToggleHints}>
+              {gameState.showMoveHints ? "Hide Move Hints" : "Show Move Hints"}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleConfirmMove}
+              disabled={!gameState.previewMove}
+            >
+              Move
+            </button>
+
             <button type="button" onClick={handleResetGame}>
               Reset Game
             </button>
           </div>
+
+          <p className="endline-help-text">
+            Tap a highlighted destination to preview a path. Tap the same
+            destination again to cycle path options when more than one exists.
+          </p>
         </aside>
       </section>
     </main>

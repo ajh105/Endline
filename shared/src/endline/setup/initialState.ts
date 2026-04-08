@@ -38,5 +38,6 @@ export function createInitialGameState(): GameState {
     winTarget: DEFAULT_WIN_TARGET,
     showMoveHints: true,
     selectedPieceId: null,
+    previewMove: null,
   };
 }
