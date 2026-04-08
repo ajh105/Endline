@@ -3,3 +3,4 @@ export * from "./types/game";
 export * from "./setup/initialState";
 export * from "./utils/board";
 export * from "./rules/movement";
+export * from "./rules/turn";

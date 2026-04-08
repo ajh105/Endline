@@ -12,6 +12,7 @@ type SearchState = {
   stepsRemaining: number;
   path: Position[];
   visited: Set<string>;
+  hasLeftOwnBaselineInThisPath: boolean;
 };
 
 export function getLegalNonCapturingMoves(
@@ -56,15 +57,27 @@ export function getLegalNonCapturingMoves(
         continue;
       }
 
-      if (piece.hasLeftBaseline && isOwnBaseline(next, piece.owner)) {
+      const nextIsOwnBaseline = isOwnBaseline(next, piece.owner);
+      const currentIsOwnBaseline = isOwnBaseline(state.current, piece.owner);
+
+      if (piece.hasLeftBaseline && nextIsOwnBaseline) {
         continue;
       }
+
+      if (state.hasLeftOwnBaselineInThisPath && nextIsOwnBaseline) {
+        continue;
+      }
+
+      const nextHasLeftOwnBaselineInThisPath =
+        state.hasLeftOwnBaselineInThisPath ||
+        (currentIsOwnBaseline && !nextIsOwnBaseline);
 
       search({
         current: next,
         stepsRemaining: state.stepsRemaining - 1,
         path: [...state.path, next],
         visited: new Set(state.visited).add(nextKey),
+        hasLeftOwnBaselineInThisPath: nextHasLeftOwnBaselineInThisPath,
       });
     }
   }
@@ -74,6 +87,7 @@ export function getLegalNonCapturingMoves(
     stepsRemaining: roll,
     path: [start],
     visited: new Set([startKey]),
+    hasLeftOwnBaselineInThisPath: false,
   });
 
   const deduped = new Map<string, LegalMove>();
