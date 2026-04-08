@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   applyLegalMove,
   createInitialGameState,
   getLegalMoves,
+  passTurnWithMessage,
   positionKey,
 } from "@shared";
 import type { GameState, LegalMove } from "@shared";
@@ -104,6 +105,7 @@ function EndlineGame() {
         ...current,
         selectedPieceId: null,
         previewMove: null,
+        turnMessage: null,
       }));
       return;
     }
@@ -121,6 +123,7 @@ function EndlineGame() {
       selectedPieceId:
         current.selectedPieceId === clickedPiece.id ? null : clickedPiece.id,
       previewMove: null,
+      turnMessage: null,
     }));
   };
 
@@ -132,7 +135,6 @@ function EndlineGame() {
     setGameState((current) => ({
       ...current,
       showMoveHints: !current.showMoveHints,
-      previewMove: !current.showMoveHints ? current.previewMove : current.previewMove,
     }));
   };
 
@@ -156,11 +158,56 @@ function EndlineGame() {
     ? getMovesForDestination(previewDestination.row, previewDestination.col).length
     : 0;
 
+  useEffect(() => {
+    if (gameState.status !== "playing") {
+      return;
+    }
+
+    const hasAnyLegalMove = gameState.pieces.some((piece) => {
+      if (!piece.alive || piece.locked || piece.owner !== gameState.currentPlayer) {
+        return false;
+      }
+
+      return getLegalMoves(piece, gameState.pieces, gameState.currentRoll).length > 0;
+    });
+
+    if (hasAnyLegalMove) {
+      return;
+    }
+
+    const playerLabel =
+      gameState.currentPlayer.charAt(0).toUpperCase() +
+      gameState.currentPlayer.slice(1);
+
+    const message = `${playerLabel} has no legal moves for roll ${gameState.currentRoll}. Turn passes.`;
+
+    const timeoutId = window.setTimeout(() => {
+      setGameState((current) => {
+        if (
+          current.status !== "playing" ||
+          current.currentPlayer !== gameState.currentPlayer ||
+          current.currentRoll !== gameState.currentRoll
+        ) {
+          return current;
+        }
+
+        return passTurnWithMessage(current, message);
+      });
+    }, 700);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [
+    gameState.currentPlayer,
+    gameState.currentRoll,
+    gameState.pieces,
+    gameState.status,
+  ]);
+
   return (
     <main className="endline-page">
       <section className="endline-header">
         <h1>Endline</h1>
-        <p>Clear path preview checkpoint</p>
+        <p>Auto-pass turn checkpoint</p>
       </section>
 
       <section className="endline-layout">
@@ -180,6 +227,11 @@ function EndlineGame() {
           <p>
             <strong>Status:</strong> {gameState.status}
           </p>
+
+          {gameState.turnMessage ? (
+            <div className="endline-turn-message">{gameState.turnMessage}</div>
+          ) : null}
+
           <p>
             <strong>Current Player:</strong> {gameState.currentPlayer}
           </p>

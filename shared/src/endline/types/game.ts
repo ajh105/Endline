@@ -36,4 +36,5 @@ export type GameState = {
   showMoveHints: boolean;
   selectedPieceId: string | null;
   previewMove: LegalMove | null;
+  turnMessage: string | null;
 };

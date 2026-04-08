@@ -39,5 +39,6 @@ export function createInitialGameState(): GameState {
     showMoveHints: true,
     selectedPieceId: null,
     previewMove: null,
+    turnMessage: null,
   };
 }

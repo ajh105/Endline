@@ -124,7 +124,22 @@ export function applyLegalMove(
     currentRoll: rollD4(),
     selectedPieceId: null,
     previewMove: null,
+    turnMessage: null,
     status: "playing",
     winner: null,
+  };
+}
+
+export function passTurnWithMessage(
+  gameState: GameState,
+  message: string
+): GameState {
+  return {
+    ...gameState,
+    currentPlayer: getOpponent(gameState.currentPlayer),
+    currentRoll: rollD4(),
+    selectedPieceId: null,
+    previewMove: null,
+    turnMessage: message,
   };
 }
