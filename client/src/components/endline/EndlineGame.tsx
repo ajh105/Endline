@@ -207,8 +207,17 @@ function EndlineGame() {
     <main className="endline-page">
       <section className="endline-header">
         <h1>Endline</h1>
-        <p>Auto-pass turn checkpoint</p>
+        <p>Winner banner checkpoint</p>
       </section>
+
+      {gameState.winner ? (
+        <section className={`endline-winner-banner ${gameState.winner}`}>
+          <h2>
+            {gameState.winner === "red" ? "Red Wins!" : "Blue Wins!"}
+          </h2>
+          {gameState.winReason ? <p>{gameState.winReason}</p> : null}
+        </section>
+      ) : null}
 
       <section className="endline-layout">
         <Board

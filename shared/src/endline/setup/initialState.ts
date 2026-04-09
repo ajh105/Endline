@@ -40,5 +40,6 @@ export function createInitialGameState(): GameState {
     selectedPieceId: null,
     previewMove: null,
     turnMessage: null,
+    winReason: null,
   };
 }

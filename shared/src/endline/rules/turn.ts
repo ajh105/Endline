@@ -81,6 +81,7 @@ export function applyLegalMove(
       winner: "red",
       selectedPieceId: null,
       previewMove: null,
+      winReason: "Red reached the win target.",
     };
   }
 
@@ -92,6 +93,7 @@ export function applyLegalMove(
       winner: "blue",
       selectedPieceId: null,
       previewMove: null,
+      winReason: "Blue reached the win target.",
     };
   }
 
@@ -103,6 +105,7 @@ export function applyLegalMove(
       winner: "blue",
       selectedPieceId: null,
       previewMove: null,
+      winReason: "Red no longer has enough remaining pieces to meet the win target.",
     };
   }
 
@@ -114,6 +117,7 @@ export function applyLegalMove(
       winner: "red",
       selectedPieceId: null,
       previewMove: null,
+      winReason: "Blue no longer has enough remaining pieces to meet the win target.",
     };
   }
 
@@ -125,6 +129,7 @@ export function applyLegalMove(
     selectedPieceId: null,
     previewMove: null,
     turnMessage: null,
+    winReason: null,
     status: "playing",
     winner: null,
   };
@@ -141,5 +146,6 @@ export function passTurnWithMessage(
     selectedPieceId: null,
     previewMove: null,
     turnMessage: message,
+    winReason: null,
   };
 }
