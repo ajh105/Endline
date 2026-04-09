@@ -30,6 +30,7 @@ export type GameState = {
   pieces: Piece[];
   currentPlayer: PlayerId;
   currentRoll: 1 | 2 | 3 | 4;
+  rollKey: number;
   status: GameStatus;
   winner: PlayerId | null;
   winTarget: number;

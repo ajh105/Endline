@@ -8,6 +8,12 @@ import {
 } from "@shared";
 import type { GameState, LegalMove } from "@shared";
 import Board from "./Board";
+import { useNavigate } from "react-router-dom";
+import GameTopBar from "./GameTopBar";
+import QuitMatchModal from "./QuitMatchModal";
+import RulesPanel from "./RulesPanel";
+import SettingsPanel from "./SettingsPanel";
+import DiceDisplay from "./DiceDisplay";
 
 type AnimationState = {
   move: LegalMove;
@@ -20,6 +26,12 @@ function EndlineGame() {
   );
 
   const [animationState, setAnimationState] = useState<AnimationState | null>(null);
+
+  const navigate = useNavigate();
+
+  const [isRulesOpen, setIsRulesOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isQuitModalOpen, setIsQuitModalOpen] = useState(false);
 
   const selectedPiece =
     gameState.pieces.find((piece) => piece.id === gameState.selectedPieceId) ??
@@ -143,6 +155,11 @@ function EndlineGame() {
     setGameState(createInitialGameState());
   };
 
+  const handleQuitMatch = () => {
+    setIsQuitModalOpen(false);
+    navigate("/");
+  };
+
   const handleToggleHints = () => {
     setGameState((current) => ({
       ...current,
@@ -173,14 +190,6 @@ function EndlineGame() {
   const previewMove = gameState.previewMove;
   const previewPath = previewMove?.path ?? [];
   const previewDestination = previewMove?.destination ?? null;
-  const capturedPiece =
-    previewMove?.capturedPieceId
-      ? gameState.pieces.find((piece) => piece.id === previewMove.capturedPieceId) ?? null
-      : null;
-
-  const pathVariantCount = previewDestination
-    ? getMovesForDestination(previewDestination.row, previewDestination.col).length
-    : 0;
 
   const isAnimating = animationState !== null;
 
@@ -308,10 +317,18 @@ function EndlineGame() {
 
   return (
     <main className="endline-page">
-      <section className="endline-header">
-        <h1>Endline</h1>
-        <p>Winner banner checkpoint</p>
-      </section>
+      <GameTopBar
+        currentPlayer={gameState.currentPlayer}
+        onOpenRules={() => {
+          setIsRulesOpen((current) => !current);
+          setIsSettingsOpen(false);
+        }}
+        onOpenSettings={() => {
+          setIsSettingsOpen((current) => !current);
+          setIsRulesOpen(false);
+        }}
+        onOpenQuit={() => setIsQuitModalOpen(true)}
+      />
 
       {gameState.winner ? (
         <section className={`endline-winner-banner ${gameState.winner}`}>
@@ -322,99 +339,91 @@ function EndlineGame() {
         </section>
       ) : null}
 
-      <section className="endline-layout">
-        <Board
-          pieces={gameState.pieces}
-          selectedPieceId={isAnimating ? null : gameState.selectedPieceId}
-          legalMoves={isAnimating ? [] : legalMoves}
-          showMoveHints={isAnimating ? false : gameState.showMoveHints}
-          previewPath={isAnimating ? [] : previewPath}
-          previewDestination={isAnimating ? null : previewDestination}
-          previewCapturedPieceId={isAnimating ? null : previewMove?.capturedPieceId ?? null}
-          isGameOver={gameState.status !== "playing"}
-          hiddenPieceIds={hiddenPieceIds}
-          animationPiece={animationPiece}
-          onSquareClick={handleSquareClick}
+      {isRulesOpen ? (
+        <div
+          className="endline-modal-backdrop"
+          onClick={() => setIsRulesOpen(false)}
+        >
+          <div
+            className="endline-modal-panel-wrap"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <RulesPanel onClose={() => setIsRulesOpen(false)} />
+          </div>
+        </div>
+      ) : null}
+
+      {isSettingsOpen ? (
+        <div
+          className="endline-modal-backdrop"
+          onClick={() => setIsSettingsOpen(false)}
+        >
+          <div
+            className="endline-modal-panel-wrap"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <SettingsPanel
+              showMoveHints={gameState.showMoveHints}
+              onToggleMoveHints={handleToggleHints}
+              onClose={() => setIsSettingsOpen(false)}
+            />
+          </div>
+        </div>
+      ) : null}
+
+      {isQuitModalOpen ? (
+        <QuitMatchModal
+          onCancel={() => setIsQuitModalOpen(false)}
+          onConfirm={handleQuitMatch}
         />
+      ) : null}
 
-        <aside className="endline-panel">
-          <h2>Game Info</h2>
-          <p>
-            <strong>Status:</strong> {gameState.status}
-          </p>
+      <section className="endline-layout">
+        <div className="endline-board-stack">
+          <Board
+            pieces={gameState.pieces}
+            selectedPieceId={isAnimating ? null : gameState.selectedPieceId}
+            legalMoves={isAnimating ? [] : legalMoves}
+            showMoveHints={isAnimating ? false : gameState.showMoveHints}
+            previewPath={isAnimating ? [] : previewPath}
+            previewDestination={isAnimating ? null : previewDestination}
+            previewCapturedPieceId={
+              isAnimating ? null : previewMove?.capturedPieceId ?? null
+            }
+            isGameOver={gameState.status !== "playing"}
+            hiddenPieceIds={hiddenPieceIds}
+            animationPiece={animationPiece}
+            onSquareClick={handleSquareClick}
+          />
 
-          {gameState.turnMessage ? (
-            <div className="endline-turn-message">{gameState.turnMessage}</div>
-          ) : null}
+          <aside className="endline-controls-card">
+            {gameState.turnMessage ? (
+              <div className="endline-turn-message">{gameState.turnMessage}</div>
+            ) : null}
 
-          <p>
-            <strong>Current Player:</strong> {gameState.currentPlayer}
-          </p>
-          <p>
-            <strong>Current Roll:</strong> {gameState.currentRoll}
-          </p>
-          <p>
-            <strong>Win Target:</strong> {gameState.winTarget}
-          </p>
-          <p>
-            <strong>Show Move Hints:</strong>{" "}
-            {gameState.showMoveHints ? "On" : "Off"}
-          </p>
-          <p>
-            <strong>Selected Piece:</strong>{" "}
-            {selectedPiece ? selectedPiece.id : "None"}
-          </p>
-          <p>
-            <strong>Legal Destinations:</strong> {legalMoves.length}
-          </p>
+            <div className="endline-dice-section">
+              <span className="dice-label">Roll</span>
+              <DiceDisplay
+                value={gameState.currentRoll}
+                rollKey={gameState.rollKey}
+              />
+            </div>
 
-          <div className="endline-preview-box">
-            <h3>Preview</h3>
-            <p>
-              <strong>Capture:</strong> {previewMove?.capturedPieceId ? "Yes" : "No"}
-            </p>
-            <p>
-              <strong>Path Length:</strong>{" "}
-              {previewMove ? previewMove.path.length - 1 : 0}
-            </p>
-            <p>
-              <strong>Destination:</strong>{" "}
-              {previewDestination
-                ? `(${previewDestination.row}, ${previewDestination.col})`
-                : "None"}
-            </p>
-            <p>
-              <strong>Captured Piece:</strong>{" "}
-              {capturedPiece ? capturedPiece.id : "None"}
-            </p>
-            <p>
-              <strong>Path Option Count:</strong> {pathVariantCount}
-            </p>
-          </div>
+            <div className="endline-panel-actions">
+              <button
+                type="button"
+                onClick={handleConfirmMove}
+                disabled={!gameState.previewMove}
+              >
+                Move
+              </button>
 
-          <div className="endline-panel-actions">
-            <button type="button" onClick={handleToggleHints}>
-              {gameState.showMoveHints ? "Hide Move Hints" : "Show Move Hints"}
-            </button>
-
-            <button
-              type="button"
-              onClick={handleConfirmMove}
-              disabled={!gameState.previewMove}
-            >
-              Move
-            </button>
-
-            <button type="button" onClick={handleResetGame}>
-              Reset Game
-            </button>
-          </div>
-
-          <p className="endline-help-text">
-            Tap a highlighted destination to preview a path. Tap the same
-            destination again to cycle path options when more than one exists.
-          </p>
-        </aside>
+              <button type="button" onClick={handleResetGame}>
+                Reset Game
+              </button>
+            </div>
+          </aside>
+        </div>
       </section>
     </main>
   );

@@ -33,6 +33,7 @@ export function createInitialGameState(): GameState {
     pieces: [...createBaselinePieces("red"), ...createBaselinePieces("blue")],
     currentPlayer: "red",
     currentRoll: rollD4(),
+    rollKey: 0,
     status: "playing",
     winner: null,
     winTarget: DEFAULT_WIN_TARGET,

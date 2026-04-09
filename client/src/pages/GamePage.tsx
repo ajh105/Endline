@@ -7,7 +7,7 @@ function GamePage() {
       <section className="app-shell game-shell">
         <div className="page-topbar">
           <h1>Endline Match</h1>
-          <Link className="text-link" to="/">
+          <Link className="page-nav-button" to="/">
             Back Home
           </Link>
         </div>
