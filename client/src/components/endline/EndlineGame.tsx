@@ -319,6 +319,7 @@ function EndlineGame() {
     <main className="endline-page">
       <GameTopBar
         currentPlayer={gameState.currentPlayer}
+        winTarget={gameState.winTarget}
         onOpenRules={() => {
           setIsRulesOpen((current) => !current);
           setIsSettingsOpen(false);

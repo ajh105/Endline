@@ -2,6 +2,7 @@ import type { PlayerId } from "@shared";
 
 type GameTopBarProps = {
   currentPlayer: PlayerId;
+  winTarget: number;
   onOpenRules: () => void;
   onOpenSettings: () => void;
   onOpenQuit: () => void;
@@ -9,6 +10,7 @@ type GameTopBarProps = {
 
 function GameTopBar({
   currentPlayer,
+  winTarget,
   onOpenRules,
   onOpenSettings,
   onOpenQuit,
@@ -21,6 +23,7 @@ function GameTopBar({
       <div className="endline-turn-banner">
         <span className="turn-label">Current Turn</span>
         <span className={`player-badge ${currentPlayer}`}>{playerLabel}</span>
+        <span className="target-badge">Pieces to Win: {winTarget}</span>
       </div>
 
       <div className="endline-topbar-actions">
