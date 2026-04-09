@@ -1,7 +1,8 @@
 import type { LegalMove, Piece as GamePiece, Position } from "@shared";
 import { BOARD_SIZE } from "@shared";
-import { LayoutGroup } from "motion/react";
+import { LayoutGroup, motion } from "motion/react";
 import BoardSquare from "./BoardSquare";
+import Piece from "./Piece";
 
 type BoardProps = {
   pieces: GamePiece[];
@@ -12,6 +13,14 @@ type BoardProps = {
   previewDestination: Position | null;
   previewCapturedPieceId: string | null;
   isGameOver: boolean;
+  hiddenPieceIds: string[];
+  animationPiece: {
+    pieceId: string;
+    owner: "red" | "blue";
+    locked: boolean;
+    row: number;
+    col: number;
+  } | null;
   onSquareClick: (row: number, col: number) => void;
 };
 
@@ -24,12 +33,15 @@ function Board({
   previewDestination,
   previewCapturedPieceId,
   isGameOver,
+  hiddenPieceIds,
+  animationPiece,
   onSquareClick,
 }: BoardProps) {
   const getPieceAtPosition = (row: number, col: number) => {
     return pieces.find(
       (piece) =>
         piece.alive &&
+        !hiddenPieceIds.includes(piece.id) &&
         piece.position.row === row &&
         piece.position.col === col
     );
@@ -99,6 +111,28 @@ function Board({
             );
           })
         )}
+
+        {animationPiece ? (
+          <motion.div
+            className="endline-animation-piece-layer"
+            initial={false}
+            animate={{
+              x: animationPiece.col * 72 + 12,
+              y: animationPiece.row * 72 + 12,
+            }}
+            transition={{
+              duration: 0.18,
+              ease: "easeInOut",
+            }}
+          >
+            <Piece
+              pieceId={animationPiece.pieceId}
+              owner={animationPiece.owner}
+              locked={animationPiece.locked}
+              isSelected={false}
+            />
+          </motion.div>
+        ) : null}
       </div>
     </LayoutGroup>
   );

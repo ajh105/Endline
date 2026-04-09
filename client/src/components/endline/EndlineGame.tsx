@@ -9,10 +9,17 @@ import {
 import type { GameState, LegalMove } from "@shared";
 import Board from "./Board";
 
+type AnimationState = {
+  move: LegalMove;
+  stepIndex: number;
+};
+
 function EndlineGame() {
   const [gameState, setGameState] = useState<GameState>(() =>
     createInitialGameState()
   );
+
+  const [animationState, setAnimationState] = useState<AnimationState | null>(null);
 
   const selectedPiece =
     gameState.pieces.find((piece) => piece.id === gameState.selectedPieceId) ??
@@ -49,6 +56,10 @@ function EndlineGame() {
 
   const handleSquareClick = (row: number, col: number) => {
     if (gameState.status !== "playing") {
+      return;
+    }
+
+    if (isAnimating) {
       return;
     }
 
@@ -128,6 +139,7 @@ function EndlineGame() {
   };
 
   const handleResetGame = () => {
+    setAnimationState(null);
     setGameState(createInitialGameState());
   };
 
@@ -139,11 +151,23 @@ function EndlineGame() {
   };
 
   const handleConfirmMove = () => {
-    if (!gameState.previewMove) {
+    if (!gameState.previewMove || isAnimating) {
       return;
     }
 
-    setGameState((current) => applyLegalMove(current, current.previewMove!));
+    const moveToAnimate = gameState.previewMove;
+
+    setGameState((current) => ({
+      ...current,
+      selectedPieceId: null,
+      previewMove: null,
+      turnMessage: null,
+    }));
+
+    setAnimationState({
+      move: moveToAnimate,
+      stepIndex: 0,
+    });
   };
 
   const previewMove = gameState.previewMove;
@@ -157,6 +181,52 @@ function EndlineGame() {
   const pathVariantCount = previewDestination
     ? getMovesForDestination(previewDestination.row, previewDestination.col).length
     : 0;
+
+  const isAnimating = animationState !== null;
+
+  const animatingMove = animationState?.move ?? null;
+
+  const animationPiece = useMemo(() => {
+    if (!animationState) {
+      return null;
+    }
+
+    const piece = gameState.pieces.find(
+      (currentPiece) => currentPiece.id === animationState.move.pieceId
+    );
+
+    if (!piece) {
+      return null;
+    }
+
+    const currentPosition = animationState.move.path[animationState.stepIndex];
+
+    if (!currentPosition) {
+      return null;
+    }
+
+    return {
+      pieceId: piece.id,
+      owner: piece.owner,
+      locked: false,
+      row: currentPosition.row,
+      col: currentPosition.col,
+    };
+  }, [animationState, gameState.pieces]);
+
+  const hiddenPieceIds = useMemo(() => {
+    if (!animatingMove) {
+      return [];
+    }
+
+    const ids = [animatingMove.pieceId];
+
+    if (animatingMove.capturedPieceId) {
+      ids.push(animatingMove.capturedPieceId);
+    }
+
+    return ids;
+  }, [animatingMove]);
 
   useEffect(() => {
     if (gameState.status !== "playing") {
@@ -203,6 +273,39 @@ function EndlineGame() {
     gameState.status,
   ]);
 
+  useEffect(() => {
+    if (!animationState) {
+      return;
+    }
+
+    const { move, stepIndex } = animationState;
+    const finalStepIndex = move.path.length - 1;
+
+    if (stepIndex >= finalStepIndex) {
+      const finishTimeout = window.setTimeout(() => {
+        setGameState((current) => applyLegalMove(current, move));
+        setAnimationState(null);
+      }, 180);
+
+      return () => window.clearTimeout(finishTimeout);
+    }
+
+    const stepTimeout = window.setTimeout(() => {
+      setAnimationState((current) => {
+        if (!current) {
+          return null;
+        }
+
+        return {
+          ...current,
+          stepIndex: current.stepIndex + 1,
+        };
+      });
+    }, 220);
+
+    return () => window.clearTimeout(stepTimeout);
+  }, [animationState]);
+
   return (
     <main className="endline-page">
       <section className="endline-header">
@@ -222,13 +325,15 @@ function EndlineGame() {
       <section className="endline-layout">
         <Board
           pieces={gameState.pieces}
-          selectedPieceId={gameState.selectedPieceId}
-          legalMoves={legalMoves}
-          showMoveHints={gameState.showMoveHints}
-          previewPath={previewPath}
-          previewDestination={previewDestination}
-          previewCapturedPieceId={previewMove?.capturedPieceId ?? null}
+          selectedPieceId={isAnimating ? null : gameState.selectedPieceId}
+          legalMoves={isAnimating ? [] : legalMoves}
+          showMoveHints={isAnimating ? false : gameState.showMoveHints}
+          previewPath={isAnimating ? [] : previewPath}
+          previewDestination={isAnimating ? null : previewDestination}
+          previewCapturedPieceId={isAnimating ? null : previewMove?.capturedPieceId ?? null}
           isGameOver={gameState.status !== "playing"}
+          hiddenPieceIds={hiddenPieceIds}
+          animationPiece={animationPiece}
           onSquareClick={handleSquareClick}
         />
 
