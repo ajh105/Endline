@@ -223,3 +223,8 @@
   background: rgba(0, 39, 105, 0.85);
   border-color: #0d47a1;
 }
+
+.endline-board.game-over {
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}

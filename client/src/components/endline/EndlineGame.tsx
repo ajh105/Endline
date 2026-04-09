@@ -228,6 +228,7 @@ function EndlineGame() {
           previewPath={previewPath}
           previewDestination={previewDestination}
           previewCapturedPieceId={previewMove?.capturedPieceId ?? null}
+          isGameOver={gameState.status !== "playing"}
           onSquareClick={handleSquareClick}
         />
 

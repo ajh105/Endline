@@ -10,6 +10,7 @@ type BoardProps = {
   previewPath: Position[];
   previewDestination: Position | null;
   previewCapturedPieceId: string | null;
+  isGameOver: boolean;
   onSquareClick: (row: number, col: number) => void;
 };
 
@@ -21,6 +22,7 @@ function Board({
   previewPath,
   previewDestination,
   previewCapturedPieceId,
+  isGameOver,
   onSquareClick,
 }: BoardProps) {
   const getPieceAtPosition = (row: number, col: number) => {
@@ -73,7 +75,7 @@ function Board({
   };
 
   return (
-    <div className="endline-board">
+    <div className={`endline-board ${isGameOver ? "game-over" : ""}`}>
       {Array.from({ length: BOARD_SIZE }, (_, row) =>
         Array.from({ length: BOARD_SIZE }, (_, col) => {
           const piece = getPieceAtPosition(row, col);
