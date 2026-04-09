@@ -1,5 +1,6 @@
 import type { LegalMove, Piece as GamePiece, Position } from "@shared";
 import { BOARD_SIZE } from "@shared";
+import { LayoutGroup } from "motion/react";
 import BoardSquare from "./BoardSquare";
 
 type BoardProps = {
@@ -75,29 +76,31 @@ function Board({
   };
 
   return (
-    <div className={`endline-board ${isGameOver ? "game-over" : ""}`}>
-      {Array.from({ length: BOARD_SIZE }, (_, row) =>
-        Array.from({ length: BOARD_SIZE }, (_, col) => {
-          const piece = getPieceAtPosition(row, col);
-          const previewStepNumber = getPreviewStepNumber(row, col);
+    <LayoutGroup>
+      <div className={`endline-board ${isGameOver ? "game-over" : ""}`}>
+        {Array.from({ length: BOARD_SIZE }, (_, row) =>
+          Array.from({ length: BOARD_SIZE }, (_, col) => {
+            const piece = getPieceAtPosition(row, col);
+            const previewStepNumber = getPreviewStepNumber(row, col);
 
-          return (
-            <BoardSquare
-              key={`${row}-${col}`}
-              row={row}
-              col={col}
-              piece={piece}
-              isSelected={piece?.id === selectedPieceId}
-              isLegalDestination={isLegalDestination(row, col)}
-              previewStepNumber={previewStepNumber}
-              isPreviewDestination={isPreviewDestination(row, col)}
-              isPreviewCapturedPiece={isPreviewCapturedPiece(row, col)}
-              onClick={() => onSquareClick(row, col)}
-            />
-          );
-        })
-      )}
-    </div>
+            return (
+              <BoardSquare
+                key={`${row}-${col}`}
+                row={row}
+                col={col}
+                piece={piece}
+                isSelected={piece?.id === selectedPieceId}
+                isLegalDestination={isLegalDestination(row, col)}
+                previewStepNumber={previewStepNumber}
+                isPreviewDestination={isPreviewDestination(row, col)}
+                isPreviewCapturedPiece={isPreviewCapturedPiece(row, col)}
+                onClick={() => onSquareClick(row, col)}
+              />
+            );
+          })
+        )}
+      </div>
+    </LayoutGroup>
   );
 }
 

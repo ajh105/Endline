@@ -43,6 +43,7 @@ function BoardSquare({
       {piece ? (
         <>
           <Piece
+            pieceId={piece.id}
             owner={piece.owner}
             locked={piece.locked}
             isSelected={isSelected}
