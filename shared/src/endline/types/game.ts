@@ -35,6 +35,7 @@ export type GameState = {
   winner: PlayerId | null;
   winTarget: number;
   showMoveHints: boolean;
+  soundEffectsEnabled: boolean;
   selectedPieceId: string | null;
   previewMove: LegalMove | null;
   turnMessage: string | null;

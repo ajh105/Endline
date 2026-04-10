@@ -1,12 +1,16 @@
 type SettingsPanelProps = {
   showMoveHints: boolean;
+  soundEffectsEnabled: boolean;
   onToggleMoveHints: () => void;
+  onToggleSoundEffects: () => void;
   onClose: () => void;
 };
 
 function SettingsPanel({
   showMoveHints,
+  soundEffectsEnabled,
   onToggleMoveHints,
+  onToggleSoundEffects,
   onClose,
 }: SettingsPanelProps) {
   return (
@@ -25,6 +29,15 @@ function SettingsPanel({
             type="checkbox"
             checked={showMoveHints}
             onChange={onToggleMoveHints}
+          />
+        </label>
+
+        <label className="settings-row">
+          <span>Sound Effects</span>
+          <input
+            type="checkbox"
+            checked={soundEffectsEnabled}
+            onChange={onToggleSoundEffects}
           />
         </label>
       </div>

@@ -38,6 +38,7 @@ export function createInitialGameState(): GameState {
     winner: null,
     winTarget: DEFAULT_WIN_TARGET,
     showMoveHints: true,
+    soundEffectsEnabled: true,
     selectedPieceId: null,
     previewMove: null,
     turnMessage: null,

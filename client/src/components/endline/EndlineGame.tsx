@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   applyLegalMove,
   createInitialGameState,
@@ -14,6 +14,7 @@ import QuitMatchModal from "./QuitMatchModal";
 import RulesPanel from "./RulesPanel";
 import SettingsPanel from "./SettingsPanel";
 import DiceDisplay from "./DiceDisplay";
+import movePieceSound from "../../assets/sounds/move-piece.mp3";
 
 type AnimationState = {
   move: LegalMove;
@@ -26,6 +27,8 @@ function EndlineGame() {
   );
 
   const [animationState, setAnimationState] = useState<AnimationState | null>(null);
+
+  const moveSoundRef = useRef<HTMLAudioElement | null>(null);
 
   const navigate = useNavigate();
 
@@ -167,6 +170,13 @@ function EndlineGame() {
     }));
   };
 
+  const handleToggleSoundEffects = () => {
+    setGameState((current) => ({
+      ...current,
+      soundEffectsEnabled: !current.soundEffectsEnabled,
+    }));
+  };
+
   const handleConfirmMove = () => {
     if (!gameState.previewMove || isAnimating) {
       return;
@@ -290,6 +300,15 @@ function EndlineGame() {
     const { move, stepIndex } = animationState;
     const finalStepIndex = move.path.length - 1;
 
+    if (
+      stepIndex > 0 &&
+      gameState.soundEffectsEnabled &&
+      moveSoundRef.current
+    ) {
+      moveSoundRef.current.currentTime = 0;
+      void moveSoundRef.current.play().catch(() => {});
+    }
+
     if (stepIndex >= finalStepIndex) {
       const finishTimeout = window.setTimeout(() => {
         setGameState((current) => applyLegalMove(current, move));
@@ -313,7 +332,7 @@ function EndlineGame() {
     }, 220);
 
     return () => window.clearTimeout(stepTimeout);
-  }, [animationState]);
+  }, [animationState, gameState.soundEffectsEnabled]);
 
   return (
     <main className="endline-page">
@@ -365,7 +384,9 @@ function EndlineGame() {
           >
             <SettingsPanel
               showMoveHints={gameState.showMoveHints}
+              soundEffectsEnabled={gameState.soundEffectsEnabled}
               onToggleMoveHints={handleToggleHints}
+              onToggleSoundEffects={handleToggleSoundEffects}
               onClose={() => setIsSettingsOpen(false)}
             />
           </div>
@@ -426,6 +447,8 @@ function EndlineGame() {
           </aside>
         </div>
       </section>
+
+      <audio ref={moveSoundRef} preload="auto" src={movePieceSound} />
     </main>
   );
 }
