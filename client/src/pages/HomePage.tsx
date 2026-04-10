@@ -1,34 +1,42 @@
 import { Link } from "react-router-dom";
+import endlineLogo from "../assets/endline-logo.png";
 
 function HomePage() {
   return (
-    <main className="app-page">
-      <section className="app-shell">
-        <h1 className="app-title">Endline</h1>
-        <p className="app-subtitle">
-          A tactical path-based board game of movement, capture, and timing.
-        </p>
+    <main className="home-page">
+      <div className="home-background-glow" />
 
-        <div className="menu-grid">
-          <Link className="menu-button primary" to="/game/local">
-            Local Game
-          </Link>
+      <section className="home-shell">
+        <div className="home-hero">
+          <img
+            src={endlineLogo}
+            alt="Endline logo"
+            className="home-logo"
+          />
 
-          <Link className="menu-button" to="/rooms/create">
-            Create Room
-          </Link>
+          <div className="home-primary-actions">
+            <Link className="hero-button primary" to="/game/local">
+              Local Game
+            </Link>
 
-          <Link className="menu-button" to="/rooms/join">
-            Join Room
-          </Link>
+            <Link className="hero-button primary alt" to="/rooms/create">
+              Create Room
+            </Link>
+          </div>
 
-          <Link className="menu-button" to="/rules">
-            Rules
-          </Link>
+          <div className="home-secondary-actions">
+            <Link className="hero-button secondary" to="/rooms/join">
+              Join Room
+            </Link>
 
-          <Link className="menu-button" to="/settings">
-            Settings
-          </Link>
+            <Link className="hero-button secondary" to="/rules">
+              Rules
+            </Link>
+
+            <Link className="hero-button secondary" to="/settings">
+              Settings
+            </Link>
+          </div>
         </div>
       </section>
     </main>
