@@ -466,3 +466,259 @@
     justify-items: stretch;
   }
 }
+
+.lobby-shell {
+  max-width: 980px;
+}
+
+.lobby-layout {
+  display: grid;
+  gap: 18px;
+}
+
+.lobby-card {
+  padding: 20px;
+  border: 1px solid #444;
+  border-radius: 14px;
+  background: #171717;
+}
+
+.lobby-room-card {
+  background:
+    radial-gradient(circle at 85% 20%, rgba(54, 111, 255, 0.12), transparent 28%),
+    #171717;
+}
+
+.lobby-room-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.lobby-eyebrow {
+  margin: 0 0 6px;
+  font-size: 0.9rem;
+  color: #bfc7d8;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.lobby-room-code {
+  margin: 0;
+  font-size: 2rem;
+  letter-spacing: 0.08em;
+}
+
+.lobby-status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid #4f67b8;
+  background: rgba(43, 63, 119, 0.55);
+  color: white;
+  font-weight: 600;
+}
+
+.lobby-room-note {
+  margin: 14px 0 0;
+  color: #cfcfcf;
+  line-height: 1.5;
+}
+
+.lobby-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.lobby-section-header h3 {
+  margin: 0;
+}
+
+.lobby-subtle-text {
+  color: #b7b7b7;
+  font-size: 0.95rem;
+}
+
+.lobby-player-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lobby-player-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid #3f3f3f;
+  border-radius: 12px;
+  background: #121212;
+  flex-wrap: wrap;
+}
+
+.lobby-player-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lobby-player-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.lobby-player-name {
+  font-weight: 600;
+}
+
+.lobby-host-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(90, 90, 90, 0.3);
+  border: 1px solid #666;
+  font-size: 0.85rem;
+}
+
+.lobby-ready-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.lobby-ready-badge.ready {
+  background: rgba(33, 124, 64, 0.28);
+  border: 1px solid #2f9a55;
+  color: #dff7e6;
+}
+
+.lobby-ready-badge.not-ready {
+  background: rgba(120, 57, 57, 0.25);
+  border: 1px solid #a04b4b;
+  color: #f6dddd;
+}
+
+.lobby-toggle-button {
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid #555;
+  border-radius: 10px;
+  background: #202020;
+  color: #f5f5f5;
+  cursor: pointer;
+}
+
+.lobby-toggle-button:hover {
+  background: #2a2a2a;
+}
+
+.lobby-settings-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.lobby-setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px;
+  border: 1px solid #3f3f3f;
+  border-radius: 12px;
+  background: #121212;
+  flex-wrap: wrap;
+}
+
+.lobby-setting-row select {
+  min-width: 180px;
+  padding: 10px 12px;
+  border: 1px solid #555;
+  border-radius: 8px;
+  background: #0f0f0f;
+  color: #f5f5f5;
+}
+
+.lobby-actions-card {
+  padding-top: 18px;
+}
+
+.lobby-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.lobby-action-button {
+  min-height: 48px;
+  padding: 12px 18px;
+  border: 1px solid #555;
+  border-radius: 10px;
+  background: #222;
+  color: #f5f5f5;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.lobby-action-button:hover:not(:disabled) {
+  background: #2d2d2d;
+}
+
+.lobby-action-button.primary {
+  background: linear-gradient(180deg, #3556a8 0%, #284384 100%);
+  border-color: #5578d8;
+}
+
+.lobby-action-button.primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, #4065c0 0%, #2f4e99 100%);
+}
+
+.lobby-action-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.lobby-helper-text {
+  margin: 12px 0 0;
+  color: #cfcfcf;
+  line-height: 1.45;
+}
+
+@media (max-width: 700px) {
+  .lobby-setting-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .lobby-setting-row select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .lobby-actions {
+    flex-direction: column;
+  }
+
+  .lobby-action-button {
+    width: 100%;
+  }
+}

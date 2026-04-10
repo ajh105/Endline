@@ -275,3 +275,13 @@ input {
     align-items: center;
   }
 }
+
+.lobby-player-placeholder {
+  color: #bcbcbc;
+  font-size: 0.95rem;
+}
+
+.lobby-setting-row select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
