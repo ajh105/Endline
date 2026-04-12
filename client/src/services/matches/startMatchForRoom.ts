@@ -13,7 +13,9 @@ export async function startMatchForRoom({
   players,
   settings,
 }: StartMatchArgs) {
-  const orderedPlayers = [...players].sort((a, b) => a.seatOrder - b.seatOrder);
+  const orderedPlayers = [...players]
+    .filter((player) => player.isConnected)
+    .sort((a, b) => a.seatOrder - b.seatOrder);
 
   const redPlayer = orderedPlayers[0] ?? null;
   const bluePlayer = orderedPlayers[1] ?? null;

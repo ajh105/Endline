@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import type { BoardTheme, LobbySettings, Room, RoomPlayer } from "@shared";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { ensureAnonymousSession } from "../services/auth/ensureAnonymousSession";
 import { findRoomByCode } from "../services/rooms/findRoomByCode";
 import { startMatchForRoom } from "../services/matches/startMatchForRoom";
+import { leaveRoomByCode } from "../services/rooms/leaveRoomByCode";
 
 function LobbyPage() {
   const { roomCode = "ABCD" } = useParams();
@@ -189,8 +190,21 @@ function LobbyPage() {
     }
   }, [room, navigate]);
 
-  const handleLeaveLobby = () => {
-    navigate("/");
+  useEffect(() => {
+    if (room?.status === "closed") {
+      navigate("/");
+    }
+  }, [room, navigate]);
+
+  const handleLeaveLobby = async () => {
+    try {
+      await leaveRoomByCode(roomCode);
+      navigate("/");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to leave lobby.";
+      setErrorMessage(message);
+    }
   };
 
   const toggleOwnReady = async () => {
@@ -269,9 +283,6 @@ function LobbyPage() {
         <section className="app-shell lobby-shell">
           <div className="page-topbar">
             <h1>Lobby</h1>
-            <Link className="page-nav-button" to="/">
-              Back Home
-            </Link>
           </div>
 
           <div className="content-card">
@@ -288,9 +299,6 @@ function LobbyPage() {
         <section className="app-shell lobby-shell">
           <div className="page-topbar">
             <h1>Lobby</h1>
-            <Link className="page-nav-button" to="/">
-              Back Home
-            </Link>
           </div>
 
           <div className="content-card">
@@ -310,9 +318,6 @@ function LobbyPage() {
       <section className="app-shell lobby-shell">
         <div className="page-topbar">
           <h1>Lobby</h1>
-          <Link className="page-nav-button" to="/">
-            Back Home
-          </Link>
         </div>
 
         {errorMessage ? (

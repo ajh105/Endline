@@ -49,44 +49,31 @@ function JoinRoomPage() {
         throw new Error("This room is not accepting players right now.");
       }
 
-      const { data: existingPlayer, error: existingPlayerError } = await supabase
+      const { count, error: countError } = await supabase
         .from("room_players")
-        .select("id")
-        .eq("room_id", room.id)
-        .eq("auth_user_id", authUserId)
-        .maybeSingle();
+        .select("*", { count: "exact", head: true })
+        .eq("room_id", room.id);
 
-      if (existingPlayerError) {
-        throw existingPlayerError;
+      if (countError) {
+        throw countError;
       }
 
-      if (!existingPlayer) {
-        const { count, error: countError } = await supabase
-          .from("room_players")
-          .select("*", { count: "exact", head: true })
-          .eq("room_id", room.id);
+      const nextSeatOrder = (count ?? 0) + 1;
 
-        if (countError) {
-          throw countError;
-        }
+      const { error: insertPlayerError } = await supabase
+        .from("room_players")
+        .insert({
+          room_id: room.id,
+          auth_user_id: authUserId,
+          display_name: trimmedName,
+          seat_order: nextSeatOrder,
+          is_host: false,
+          is_ready: false,
+          is_connected: true,
+        });
 
-        const nextSeatOrder = (count ?? 0) + 1;
-
-        const { error: insertPlayerError } = await supabase
-          .from("room_players")
-          .insert({
-            room_id: room.id,
-            auth_user_id: authUserId,
-            display_name: trimmedName,
-            seat_order: nextSeatOrder,
-            is_host: false,
-            is_ready: false,
-            is_connected: true,
-          });
-
-        if (insertPlayerError) {
-          throw insertPlayerError;
-        }
+      if (insertPlayerError) {
+        throw insertPlayerError;
       }
 
       navigate(`/lobby/${room.code}`);
@@ -133,7 +120,11 @@ function JoinRoomPage() {
 
             {errorMessage ? <p>{errorMessage}</p> : null}
 
-            <button className="menu-button primary" type="submit" disabled={isJoining}>
+            <button
+              className="menu-button primary"
+              type="submit"
+              disabled={isJoining}
+            >
               {isJoining ? "Joining..." : "Join Room"}
             </button>
           </form>
